@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&family=Oswald:wght@400;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  font-family: "Inter", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.88);
+  background-color: #090909;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #090909;
+  color: #f7f7f7;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+  opacity: 0.12;
+  mix-blend-mode: screen;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Restored original Anton font for general headings */
+.font-anton {
+  font-family: "Anton", sans-serif;
+}
+
+/* Custom fonts for specific sections (e.g. Hero Section) */
+.font-bebas {
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.font-syne {
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.font-oswald {
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+}
+
+::selection {
+  background: rgba(229, 57, 70, 0.35);
+  color: white;
+}
