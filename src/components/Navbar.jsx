@@ -38,9 +38,9 @@ function Navbar() {
       >
         <div className="mx-auto max-w-7xl px-6 lg:px-12 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2.5 group">
-            <img src={logo} className="w-auto h-9 md:h-10 transition-transform duration-300 group-hover:scale-105" alt="logo" />
-            <span className="font-anton text-2xl uppercase tracking-wider text-white transition-colors duration-300">
+          <a href="#" className="flex items-center gap-3.5 group">
+            <img src={logo} className="w-auto h-12 md:h-14 transition-transform duration-300 group-hover:scale-105" alt="logo" />
+            <span className="font-anton text-2xl md:text-3xl uppercase tracking-wider text-white transition-colors duration-300">
               BODY<span className="text-[#E63946] group-hover:text-white transition-all duration-300">TEMPLE</span>
             </span>
           </a>
@@ -89,9 +89,9 @@ function Navbar() {
       >
         {/* Drawer Header (Logo + Close Button) */}
         <div className="flex justify-between items-center px-4 w-full">
-          <div className="flex items-center gap-2.5">
-            <img src={logo} className="w-auto h-9" alt="logo" />
-            <span className="font-anton text-2xl uppercase tracking-wider text-white">
+          <div className="flex items-center gap-3">
+            <img src={logo} className="w-auto h-11" alt="logo" />
+            <span className="font-anton text-3xl uppercase tracking-wider text-white">
               BODY<span className="text-[#E63946]">TEMPLE</span>
             </span>
           </div>
