@@ -3,7 +3,7 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import logo from "../assets/logo1.png";
 
 const navLinks = [
-  { name: "Home", href: "#" },
+  { name: "Home", href: "#home" },
   { name: "About", href: "#about" },
   { name: "Tour", href: "#tour" },
   { name: "Why Us", href: "#why-choose-us" },
@@ -13,58 +13,197 @@ const navLinks = [
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [navbarState, setNavbarState] = useState("hero"); // "hero" | "scrolled" | "shrunk"
+  const [isVisible, setIsVisible] = useState(true);
+  const [activeSection, setActiveSection] = useState("home");
 
+  // Scroll states and visibility triggers
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateNavbar = () => {
+      const currentScrollY = window.scrollY;
+
+      // 1. Determine scrolled & shrunk state thresholds
+      if (currentScrollY <= 50) {
+        setNavbarState("hero");
+      } else if (currentScrollY > 50 && currentScrollY <= 150) {
+        setNavbarState("scrolled");
       } else {
-        setScrolled(false);
+        setNavbarState("shrunk");
+      }
+
+      // 2. Hide on scroll down past 300px, show on scroll up
+      if (currentScrollY > 300) {
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down
+          setIsVisible(false);
+        } else {
+          // Scrolling up
+          setIsVisible(true);
+        }
+      } else {
+        setIsVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNavbar);
+        ticking = true;
       }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // IntersectionObserver for active section highlight tracking
+  useEffect(() => {
+    const sectionIds = ["home", "about", "tour", "why-choose-us", "faq", "contact"];
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: "-25% 0px -55% 0px", // triggers when section occupies the focal area
+      threshold: 0.1,
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    // Fallback: force highlight home when very close to top
+    const handleScrollTop = () => {
+      if (window.scrollY < 80) {
+        setActiveSection("home");
+      }
+    };
+    window.addEventListener("scroll", handleScrollTop, { passive: true });
+
+    return () => {
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.unobserve(el);
+      });
+      window.removeEventListener("scroll", handleScrollTop);
+    };
+  }, []);
+
+  // Premium smooth scrolling handler
+  const handleNavLinkClick = (e, href) => {
+    e.preventDefault();
+    setIsOpen(false);
+
+    const targetId = href.startsWith("#") ? href : `#${href}`;
+    if (targetId === "#home") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      return;
+    }
+
+    const targetEl = document.querySelector(targetId);
+    if (targetEl) {
+      // Offset values based on shrink states
+      const navbarHeight = navbarState === "shrunk" ? 64 : navbarState === "scrolled" ? 72 : 88;
+      const targetPosition = targetEl.getBoundingClientRect().top + window.scrollY - navbarHeight + 2;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "bg-[#090909]/90 border-b border-white/10 backdrop-blur-md py-4 shadow-2xl"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out transform ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        } ${
+          navbarState === "shrunk"
+            ? "bg-[#090909]/95 border-b border-white/10 backdrop-blur-md py-3 shadow-2xl"
+            : navbarState === "scrolled"
+            ? "bg-[#090909]/90 border-b border-white/5 backdrop-blur-md py-4 shadow-xl"
             : "bg-transparent py-6"
         }`}
       >
         <div className="mx-auto max-w-7xl px-6 lg:px-12 flex items-center justify-between">
-          {/* Logo */}
-          <a href="#" className="flex items-center gap-3.5 group">
-            <img src={logo} className="w-auto h-12 md:h-14 transition-transform duration-300 group-hover:scale-105" alt="logo" />
-            <span className="font-anton text-2xl md:text-3xl uppercase tracking-wider text-white transition-colors duration-300">
-              BODY<span className="text-[#E63946] group-hover:text-white transition-all duration-300">TEMPLE</span>
+          {/* Logo with scaling animations */}
+          <a
+            href="#home"
+            onClick={(e) => handleNavLinkClick(e, "#home")}
+            className="flex items-center gap-3.5 group"
+          >
+            <img
+              src={logo}
+              className={`w-auto transition-all duration-500 ease-in-out group-hover:scale-105 ${
+                navbarState === "shrunk" ? "h-9" : navbarState === "scrolled" ? "h-11" : "h-12 md:h-14"
+              }`}
+              alt="logo"
+            />
+            <span
+              className={`font-anton uppercase tracking-wider text-white transition-all duration-500 ease-in-out ${
+                navbarState === "shrunk" ? "text-xl md:text-2xl" : "text-2xl md:text-3xl"
+              }`}
+            >
+              BODY
+              <span className="text-[#E63946] group-hover:text-white transition-all duration-300">
+                TEMPLE
+              </span>
             </span>
           </a>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="relative text-xs uppercase tracking-[0.2em] font-medium text-white/70 transition-all duration-300 hover:text-white py-1.5 group/link"
-              >
-                {link.name}
-                {/* Underline hover effect */}
-                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#E63946] transition-all duration-300 group-hover/link:w-full" />
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const targetId = link.href.substring(1);
+              const isActive = activeSection === targetId;
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleNavLinkClick(e, link.href)}
+                  className={`relative text-xs uppercase tracking-[0.2em] font-medium transition-all duration-300 py-1.5 group/link ${
+                    isActive ? "text-[#E63946] font-semibold" : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  {link.name}
+                  {/* Underline hover / active slide in */}
+                  <span
+                    className={`absolute bottom-0 left-0 h-[1.5px] bg-[#E63946] transition-all duration-300 ease-in-out ${
+                      isActive ? "w-full" : "w-0 group-hover/link:w-full"
+                    }`}
+                  />
+                </a>
+              );
+            })}
           </div>
 
           {/* Join Us CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <a
               href="#membership"
-              className="rounded-full bg-[#E63946] px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 hover:shadow-[0_0_20px_rgba(230,57,70,0.4)]"
+              onClick={(e) => handleNavLinkClick(e, "#membership")}
+              className={`rounded-full bg-[#E63946] text-xs font-bold uppercase tracking-widest text-white transition-all duration-500 hover:bg-white hover:text-black hover:scale-105 hover:shadow-[0_0_20px_rgba(230,57,70,0.4)] ${
+                navbarState === "shrunk" ? "px-5 py-2" : "px-6 py-2.5"
+              }`}
             >
               join us
             </a>
@@ -106,26 +245,32 @@ function Navbar() {
 
         {/* Drawer Links */}
         <div className="flex flex-col gap-6 text-center">
-          {navLinks.map((link, idx) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="font-anton text-3xl sm:text-4xl uppercase tracking-widest text-white transition-colors duration-300 hover:text-[#E63946]"
-              style={{
-                transitionDelay: `${idx * 50}ms`
-              }}
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link, idx) => {
+            const targetId = link.href.substring(1);
+            const isActive = activeSection === targetId;
+            return (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={(e) => handleNavLinkClick(e, link.href)}
+                className={`font-anton text-3xl sm:text-4xl uppercase tracking-widest transition-colors duration-300 ${
+                  isActive ? "text-[#E63946]" : "text-white hover:text-[#E63946]"
+                }`}
+                style={{
+                  transitionDelay: `${idx * 50}ms`,
+                }}
+              >
+                {link.name}
+              </a>
+            );
+          })}
         </div>
 
         {/* Drawer CTA */}
         <div className="flex flex-col items-center gap-4 px-4 w-full">
           <a
             href="#membership"
-            onClick={() => setIsOpen(false)}
+            onClick={(e) => handleNavLinkClick(e, "#membership")}
             className="w-full max-w-sm text-center rounded-full bg-[#E63946] py-4 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-white hover:text-black"
           >
             Forge Membership

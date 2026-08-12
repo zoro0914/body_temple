@@ -62,6 +62,7 @@ function HeroSection({ heroRef, cursorPosition }) {
   return (
     <header
       ref={heroRef}
+      id="home"
       className="relative h-screen min-h-[600px] overflow-hidden bg-[#090909]"
     >
       {/* Background gradients */}
